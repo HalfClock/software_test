@@ -100,7 +100,7 @@ if __name__ == '__main__':
     1. HttpRequest()可以返回一个模拟的请求对象。
     2. HttpResponse()可以返回一个响应对象，可以使用该对象定义返回的元素。
     3. Request对象一般会被交给对应的view处理，并返回对应的Response对象。
-
+5. 
 
 #### 需要记住的
 
@@ -109,3 +109,11 @@ if __name__ == '__main__':
 3. 为什么需要如此琐碎的测试？
     1. Having a test there for a simple function means it’s that much less of a psychological barrier to overcome when the simple function gets a tiny bit more complex—perhaps it grows an if. Then a few weeks later it grows a for loop. Before you know it, it’s a recursive metaclass-based polymorphic tree parser factory. But because it’s had tests from the very beginning, adding a new test each time has felt quite natural, and it’s well tested.
     2. 大意：现在做的微小的测试工作能够很好的为将来复杂的函数打好基础，当复杂函数出现问题时，经过如此多的测试，问题可以很快的被解决。
+
+ 
+
+        
+     
+
+
+ 
