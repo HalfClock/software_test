@@ -154,7 +154,7 @@ def test_home_page_return_correct_html(self):
 >功能一致，但是代码improve了，这就是代码重构
 
 7.增加了代码重构的TDD流程：
-![c5a159652fef78e093ef40477b1c9528.png](evernotecid://EA6C2580-46B5-4CF3-8CAD-5D914D9FF98F/appyinxiangcom/17784275/ENResource/p2928)
+![avatar](/images/TDD2)
 
 
 
