@@ -24,16 +24,8 @@ python manage.py runserver
 3. **单元测试**：**面向编程者、从内部测试应用程序。**
     * Unit tests should help you to write code that’s clean and bug free.
 4. TDD测试的工作流程：
-```mermaid
-graph TD
-A[先编写一个功能测试] --> C{功能测试是否失败}
-C -->|失败| D[编写一个或多个单元测试]
-   D --> F{是否失败}
-   F -->|失败| G[继续修改代码]
-   G --> F
-   F -->|成功| C
-C -->|成功| E[结束]
-```
+
+![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/TDD1.png)
 
 5. python unittest标准库
     * setUp()
@@ -49,14 +41,7 @@ C -->|成功| E[结束]
     2. Django的主要工作与别的Web服务器一样，响应用户对网站特定URL的访问
     3. Django工作流程：
         
-```mermaid
-sequenceDiagram
-用户->>Django服务器: HTTP请求
-Django服务器 ->>特定的view (被django选中):HTTP请求
-Note right of 特定的view (被django选中):View 做URL解析
-特定的view (被django选中)->> Django服务器:HTTP响应
-Django服务器->>用户: HTTP响应
-```
+![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/django1.png)
 
 #### 需要记住的代码
    
@@ -154,7 +139,7 @@ def test_home_page_return_correct_html(self):
 >功能一致，但是代码improve了，这就是代码重构
 
 7.增加了代码重构的TDD流程：
-![avatar](/images/TDD2)
+![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/TDD2.png)
 
 
 
