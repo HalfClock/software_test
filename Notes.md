@@ -1,4 +1,4 @@
-# 第一节
+# 第一节 简介
 
 #### 知识收获
 1. 前导性知识
@@ -15,7 +15,7 @@ django-admin.py startproject superlists
 python manage.py runserver
 ```
 
-# 第二节
+# 第二节 TDD流程概述及功能测试
 #### 知识性收获
 
 1. 功能测试(Functional Test)==验收测试(Acceptance Test)==端到端测试(End-to-End Test)==黑盒测试(Black Box Test)
@@ -112,7 +112,53 @@ if __name__ == '__main__':
 
  
 
-        
+# 第四节 完整的TDD流程
+    本节在引入了代码重构的基础上，用例子演示了一遍一整个TDD的流程(包括之前没有的代码重构)
+#### 知识性收获
+
+1. 单元测试应该是是关于**代码逻辑，数据流控制和配置相关**的测试。不应该用于测试数据内容（NB:HTML便签中的内容）是否正确。
+2. **Refactoring(重构)**:当我们尝试去改进代码，而有不改变功能的时候就叫代码重构。
+    1. 因为重构不改变代码的功能，所以重构最好是**基于严格测试的**
+3. **Django的render函数**
+    1. django.shortcut 包中的render(request,'home.html')
+    2. 参数：请求对象，**要呈现的模板的名称**
+    3. Django将在您的任何应用程序目录中自动搜索名为templates的文件夹。然后，它会**根据模板的内容** **为您构建一个HttpResponse。**
+    4.  templates是Django的一个非常强大的功能，它们的主要优势在于将Python变量替换为HTML文本
+4. 新建了一个app需要在Django中**注册**，否则Django会找不到此APP，包括其中的templates
+    1. 在app属于的projects目录的settings.py中的INSTALLED_APPS列表中注册此APP，添加APP的名称
+```python
+INSTALLED_APPS = [
+'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles', 'lists',
+]
+```
+5. django.template.loader包中的**render_to_string('home.html')**
+    1.此函数将特定的templates直接转化成html内容字符串
+6. Django工具包——Django Test Client： 
+```python
+def test_home_page_return_correct_html(self):
+    response = self.client.get('/')
+    self.assertTemplateUsed(response,'home.html')
+```
+```python
+def test_home_page_return_correct_html(self):
+    request = HttpRequest()
+    response = home_page(request)   
+    html = response.content.decode('utf8')
+    self.assertTrue(html.startswith('<html>'))
+    self.assertIn('<title>To-Do lists</title>', html)
+    self.assertTrue(html.endswith('</html>'))
+```
+>**上面的两段代码功能一致**
+>assertTemplateUsed直接把模板进行内容上的对比，省去了很多html的内容测试断言
+>这符合单元测试的规矩——单元测试应该是是关于**代码逻辑，数据流控制和配置相关**的测试。
+>功能一致，但是代码improve了，这就是代码重构
+
+7.增加了代码重构的TDD流程：
+![c5a159652fef78e093ef40477b1c9528.png](evernotecid://EA6C2580-46B5-4CF3-8CAD-5D914D9FF98F/appyinxiangcom/17784275/ENResource/p2928)
+
+
+
+
      
 
 
