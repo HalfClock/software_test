@@ -144,7 +144,76 @@ def test_home_page_return_correct_html(self):
 # 第五节 数据库测试
 
 #### 知识性收获
-1. 红/绿/重构和三角测试
+
+1. 当功能测试遇到不可预料的失败时，我们有几种调试方法
+    * 添加打印语句，以显示当前页面文本的内容。
+    * 改进错误消息以显示有关当前状态的更多信息。
+    * 手动访问该网站。
+    * **使用time.sleep在执行期间暂停测试。**
+    
+2. Cross-Site Request Forgery exploit(CSRF) 跨站点请求伪造攻击
+    * Django的CSRF保护涉及将一些自动生成的令牌放入每个生成的表单中，以便能够将POST请求识别为来自原始网站。
+    * **Django的CSRF令牌设置，在表单标签内部插入** ` {% csrf_token %} `
+    * Django在渲染页面时，会使用隐藏的input域来代替CSRF令牌、该隐藏域带有CSRF令牌的信息
+    
+3. render函数将第三个参数作为一个字典，它将模板中嵌入的变量名称映射到它们的值（自己给的值）：
+    * 使用 `使用{{ 变量名 }}` 可以在模板文件中嵌入python变量 `<tr><td>1: {{ new_item_text }}</td></tr>`
+    * 示例：
+        ```python
+           render(request, 'home.html', {'new_item_text': request.POST.get('item_text','')})
+        ```
+4. python 的"f-string"句法
+    * 只要在字符串前加f，就可以在字符串中间以{局部变量名}的形式插入局部变量
+    * `f"New to-do item did not appear in table. Contents were:\n{table.text}"`
+    
+5. 红/绿/重构
+    * 单元测试的流程有时可以是这样的——红色、绿色、重构
+        * 首先编写一个会测试失败的单元测试（红色）。
+        * 编写最简单的代码以使其通过（绿色），即使这意味着作弊 "cheat code"。
+        * 重构以获得更有意义的更好的代码。
+    * 重构即需要将"欺骗测试"的代码转变成令我们真正满意的代码
+        * 消除重复（测试代码与程序代码都使用了常量）
+        * 进行三角测试(triangulation)，用一般情况来代替特殊情况
+        
+6. 重构的准则 —— "三振出局"
+    * 一旦代码中存在着三次重复、那么重构它
+    * 最好的解决方法是、找到一个统一的函数来代替重复代码
+    
+7. Django ORM
+
+    >对象关系映射器（ORM）是存储在具有表，行和列的数据库中的数据的抽象层。它允许我们使用熟悉的面向对象的隐喻来处理数据库，这些隐喻可以很好地处理代码。
+
+    * 类映射到数据库表
+    * 属性映射到列
+    * 类的单个实例表示数据库中的一行数据。
+
+8. Django 的 model
+    * Django项目需要在models.py 中定义模式用于存储ORM数据库对象。
+    * models.py中的model需要继承库中的models.Model，或者类似的类
+    * 当修改了model后需要进行**数据库迁移**、以便使得现实的代码改动能够真正的在数据库中进行更改、使用 `python manage.py makemigrations`命令进行数据库迁移。
+    
+    > 在Django中，ORM的工作是为数据库建模，但是有第二个系统负责实际构建称为迁移的数据库。它的工作是根据对models.py文件所做的更改，使程序员能够添加和删除表和列。
+    
+9. 数据库测试
+    * “真正的”单元测试永远不应该触及数据库
+    * 若涉及到数据库测试的单元测应该更恰当地称为集成测试，因为它还依赖于外部系统 - 即数据库。
+
+
+#### 需要记住的代码
+
+1. 单元测试中，可以使用 `client.post('/', data={'item_text': 'A new list item'})` 来模拟客户端请求，data属性储存的是请求的参数
+
+2. `request.POST['item_text']`返回的是一个字典对象、该对象可以使用get方法
+
+3. Django的model可以使用save()、count()方法来查询对象的信息，与保存对象(修改)、示例：
+   ```python
+       second_item = Item()
+       second_item.text = 'Item the second'
+       second_item.save()
+
+       saved_items = Item.objects.all()
+       self.assertEqual(saved_items.count(), 2)
+    ```
 
 
      
