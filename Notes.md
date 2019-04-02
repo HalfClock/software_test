@@ -141,7 +141,10 @@ def test_home_page_return_correct_html(self):
 7.增加了代码重构的TDD流程：
 ![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/TDD2.png)
 
+# 第五节 数据库测试
 
+#### 知识性收获
+1. 红/绿/重构和三角测试
 
 
      
