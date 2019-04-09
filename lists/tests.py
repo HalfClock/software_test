@@ -35,13 +35,48 @@ class HomePageTest(TestCase):
         response = self.client.get('/')
         self.assertTemplateUsed(response,'home.html')
 
+
     def test_can_save_a_POST_request(self):
 
         response = self.client.post('/', data={'item_text': 'A new list item'})
 
-        self.assertIn('A new list item', response.content.decode())
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
 
-        self.assertTemplateUsed(response, 'home.html')
+        #-------测试是否渲染模板-----
+        # self.assertIn('A new list item', response.content.decode())
+        #
+        # self.assertTemplateUsed(response, 'home.html')
+
+        #-----测试重定位------
+        # self.assertEqual(response.status_code,302)
+        # self.assertEqual(response['location'], "/")
+
+    def test_redirects_after_POST(self):
+        #------将重定位分离成单独的函数-----
+        response = self.client.post('/', data={'item_text': 'A new list item'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/')
+
+
+    def test_only_saves_items_when_necessary(self):
+        self.client.get('/')
+        self.assertEqual(Item.objects.count(), 0)
+
+    #测试item是否在list中
+    def test_displays_all_list_items(self):
+
+        Item.objects.create(text='itemey 1')
+        Item.objects.create(text='itemey 2')
+
+        response = self.client.get('/')
+
+        self.assertIn('itemey 1', response.content.decode())
+        self.assertIn('itemey 2', response.content.decode())
+
+        #Setup, Exercise, Assert 是单元测试的经典结构.
+
 
 class ItemModelTest(TestCase):
 
