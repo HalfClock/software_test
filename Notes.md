@@ -4,13 +4,16 @@
 1. 前导性知识
 2. TDD的概念，即测试驱动编程（先写测试然后编程）
 3. 如何使用selenium对WEB应用进行初步的测试
+
 #### 需要记住的命令
 
 1. django开启一个project
+
 ```
 django-admin.py startproject superlists
 ```
 2. django开启对应的项目服务
+
 ```
 python manage.py runserver
 ```
@@ -24,10 +27,10 @@ python manage.py runserver
 3. **单元测试**：**面向编程者、从内部测试应用程序。**
     * Unit tests should help you to write code that’s clean and bug free.
 4. TDD测试的工作流程：
+ 
+![TDD测试的工作流程](https://raw.githubusercontent.com/HalfClock/software_test/master/images/TDD1.png)
 
-![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/TDD1.png)
-
-5. python unittest标准库
+6. python unittest标准库
     * setUp()
         * 测试之前运行
     * tearDown()
@@ -36,12 +39,13 @@ python manage.py runserver
         * 任何以test开头的方法都是测试方法，将由测试器运行
     * assertIn|assertEqual|assertTrue|assertFalse
         * 代替原生的assert语句
+
 6. Django的模式
     1. Django是按照经典的MVC模式构建的、但是它的视图更像是一个控制器
     2. Django的主要工作与别的Web服务器一样，响应用户对网站特定URL的访问
     3. Django工作流程：
         
-![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/django1.png)
+![Django的模式](https://raw.githubusercontent.com/HalfClock/software_test/master/images/django1.png)
 
 #### 需要记住的代码
    
@@ -49,6 +53,7 @@ python manage.py runserver
 * Django开始一个app
     * `python manage.py startapp lists`
 * unittest类如何使用
+
 ```python
 from selenium import webdriver
 import unittest
@@ -75,24 +80,30 @@ if __name__ == '__main__':
 #### 知识性收获
 
 1. 在Django 的app中有一个tests.py，可在其中编写自己的单元测试代码，需要编写继承自django.test包中的TestCase类的自定义类
+
 2. django.urls 包中的 resolve(‘urlname’)用于解析url参数、并返回Django用于解析此url的view对象，view对象在app中的views下定义。
+
 3. resolve('urlname')方法需要URL mapping才能起作用、Django将之放在了project目录下的urls.py中
-    1. 当调用resolve('urlname')方法时，系统会自动从mapping中查找
-    2. url条目以正则表达式开头，该表达式定义它应用于哪些URL，然后继续说明它应该将这些请求发送到哪里 - 要么是导入的视图**函数**(可调用的python对象)，要么是其他地方的另一个urls.py文件。
+    1. 当调用resolve('urlname')方法时，系统会自动从mapping中查找。
+    2. 需要注意的是，当用户正常访问url的时候，Django也会从mapping中查找对应的view，然后让对应的view去处理请求。
+    3. url条目以正则表达式开头，该表达式定义它应用于哪些URL，然后继续说明它应该将这些请求发送到哪里 - 要么是导入的视图**函数**(可调用的python对象)，要么是其他地方的另一个urls.py文件。
         1. 如：`url(r'^$', views.home_page, name='home')`
 
 4. 对比上一小节中的Django工作流程：
     1. HttpRequest()可以返回一个模拟的请求对象。
     2. HttpResponse()可以返回一个响应对象，可以使用该对象定义返回的元素。
     3. Request对象一般会被交给对应的view处理，并返回对应的Response对象。
-5. 
+ 
 
 #### 需要记住的
 
 1. git commit -am is the quickest formulation, but also gives you the **least feedback** about what’s being committed, so make sure you’ve done a git status and a git diff beforehand, and are clear on what changes are about to go in.
+
 2. TDD琐碎而繁琐的步骤可以根据情况简化
+
 3. 为什么需要如此琐碎的测试？
     1. Having a test there for a simple function means it’s that much less of a psychological barrier to overcome when the simple function gets a tiny bit more complex—perhaps it grows an if. Then a few weeks later it grows a for loop. Before you know it, it’s a recursive metaclass-based polymorphic tree parser factory. But because it’s had tests from the very beginning, adding a new test each time has felt quite natural, and it’s well tested.
+    
     2. 大意：现在做的微小的测试工作能够很好的为将来复杂的函数打好基础，当复杂函数出现问题时，经过如此多的测试，问题可以很快的被解决。
 
  
@@ -102,23 +113,28 @@ if __name__ == '__main__':
 #### 知识性收获
 
 1. 单元测试应该是是关于**代码逻辑，数据流控制和配置相关**的测试。不应该用于测试数据内容（NB:HTML便签中的内容）是否正确。
+
 2. **Refactoring(重构)**:当我们尝试去改进代码，而有不改变功能的时候就叫代码重构。
     1. 因为重构不改变代码的功能，所以重构最好是**基于严格测试的**
+
 3. **Django的render函数**
     1. django.shortcut 包中的render(request,'home.html')
+    
     2. 参数：请求对象，**要呈现的模板的名称**
+    
     3. Django将在您的任何应用程序目录中自动搜索名为templates的文件夹。然后，它会**根据模板的内容** **为您构建一个HttpResponse。**
-    4.  templates是Django的一个非常强大的功能，它们的主要优势在于将Python变量替换为HTML文本
+    
+    4. templates是Django的一个非常强大的功能，它们的主要优势在于将Python变量替换为HTML文本
+
 4. 新建了一个app需要在Django中**注册**，否则Django会找不到此APP，包括其中的templates
-    1. 在app属于的projects目录的settings.py中的INSTALLED_APPS列表中注册此APP，添加APP的名称
-```python
-INSTALLED_APPS = [
-'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles', 'lists',
-]
-```
+    1. 在app属于的projects目录的settings.py中的INSTALLED_APPS列表中注册此APP，添加APP的名称。
+    2. 代码：`INSTALLED_APPS = [ ... , ... ,'lists']`
+
 5. django.template.loader包中的**render_to_string('home.html')**
     1.此函数将特定的templates直接转化成html内容字符串
+
 6. Django工具包——Django Test Client： 
+
 ```python
 def test_home_page_return_correct_html(self):
     response = self.client.get('/')
@@ -141,7 +157,7 @@ def test_home_page_return_correct_html(self):
 7.增加了代码重构的TDD流程：
 ![Aaron Swartz](https://raw.githubusercontent.com/HalfClock/software_test/master/images/TDD2.png)
 
-# 第五节 数据库测试
+# 第五节 数据库测试前导
 
 #### 知识性收获
 
@@ -159,6 +175,7 @@ def test_home_page_return_correct_html(self):
 3. render函数将第三个参数作为一个字典，它将模板中嵌入的变量名称映射到它们的值（自己给的值）：
     * 使用 `使用{{ 变量名 }}` 可以在模板文件中嵌入python变量 `<tr><td>1: {{ new_item_text }}</td></tr>`
     * 示例：
+        
         ```python
            render(request, 'home.html', {'new_item_text': request.POST.get('item_text','')})
         ```
@@ -191,6 +208,7 @@ def test_home_page_return_correct_html(self):
     * Django项目需要在models.py 中定义模式用于存储ORM数据库对象。
     * models.py中的model需要继承库中的models.Model，或者类似的类
     * 当修改了model后需要进行**数据库迁移**、以便使得现实的代码改动能够真正的在数据库中进行更改、使用 `python manage.py makemigrations`命令进行数据库迁移。
+    * 需要注意的是，一旦继承model，那么就不能通过实例.attrname = value随意给实例创造属性了。因为model类的内部有限制
     
     > 在Django中，ORM的工作是为数据库建模，但是有第二个系统负责实际构建称为迁移的数据库。它的工作是根据对models.py文件所做的更改，使程序员能够添加和删除表和列。
     
@@ -206,6 +224,7 @@ def test_home_page_return_correct_html(self):
 2. `request.POST['item_text']`返回的是一个字典对象、该对象可以使用get方法
 
 3. Django的model可以使用save()、count()方法来查询对象的信息，与保存对象(修改)、示例：
+   
    ```python
        second_item = Item()
        second_item.text = 'Item the second'
@@ -215,7 +234,82 @@ def test_home_page_return_correct_html(self):
        self.assertEqual(saved_items.count(), 2)
     ```
 
+# 第六节 数据库测试
 
+#### 知识性收获
+1. 对于任何的request，不要将空的item存储至model中。
+    * 所以这样的代码是不应该在view中被发现的：`item.text = request.POST.get('item_text', '')`
+2. **最好让单元测试每一次测试一件事情**，所以当一个单元测试过长时，就要考虑将他拆分成多个单元测试了。
+3. **俗话说的好，在服务器在响应了POST请求后，最好重定向**。
+    * 视图函数有两个工作要完成：*处理用户输入*和*返回适当的响应*。
+    * 用户提交post请求大部分都是要将数据存进数据库中。
+    * 有了更新后的数据库，我们就可以使用get去刷新有着新数据的新页面了。
+    * 所以我们应该从定向去执行get请求而不是将处理后的数据返回(如果get请求无法呈现数据库中的数据，而是必须用请求返回的数据渲染页面，那么这个应用就太笨拙了)。
+4. **Setup，Exercise，Assert是单元测试的典型结构。**
+    * 经典的单元测试由三部分构成
+    * Setup：设置数据项、或者建立要测试的数据
+    * Exercise：处理这些数据
+    * Assert：**判断处理结果是否符合预期**
+    * 例子：
+
+```python
+    def test_displays_all_list_items(self):
+
+        Item.objects.create(text='itemey 1')
+        Item.objects.create(text='itemey 2')
+
+        response = self.client.get('/')
+
+        self.assertIn('itemey 1', response.content.decode())
+        self.assertIn('itemey 2', response.content.decode())
+```
+5. 通过migrate创建我们的生产数据库。
+    *  **单元测试的数据库会在测试过后删除**、与实际应用、功能测试中不同。
+    *  单元测试中每一个以“test_”开头的函数都会**清空数据库、从新开始。**
+    *  **单元测试用的迁移数据库命令和功能测试与实际生产中数据库迁移命令不同**：
+        *  单元测试：`python manage.py makemigrations`
+        *  功能测试：`python manage.py migrate`
+    * **与单元测试不同的是，功能测试不会在每一次的测试后清空数据库。**
+6. 实际的数据库在工程目录下的db.sqlite3文件中，在settings.py中有如下配置:
+
+```python
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+```
+    
+
+#### 需要记住的代码
+1. Django在view中重定向的代码：`redirect('/')`
+2. 重定向时，response返回的code是302，location属性是重定向的url
+
+```python
+self.assertEqual(response.status_code, 302) 
+
+self.assertEqual(response['location'], '/')
+```
+
+3. 生产数据库的迁移命令：`python manage.py migrate`
+4. 删除数据库、重新迁移的命令：
+    * `rm db.sqlite3` 注：windows可能需要停止服务器
+    * `python manage.py migrate --noinput`
+5. git tag命令可以标记一些信息
+6. Django模板标签：
+    1. {% csrf_token %}，详情见第五节的第二个知识点
+    2. {% for ... endfor %}，可以在模板的html中动态渲染数据，如后面的代码：
+    3. {{ forloop.counter }}可以记录循环的次数
+
+```html
+{% for item in items %}
+    <tr><td>{{ forloop.counter }}: {{ item.text }}</td></tr>
+{% endfor %}
+```
+
+    
+    
      
 
 
