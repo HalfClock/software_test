@@ -221,7 +221,7 @@ def test_home_page_return_correct_html(self):
 
 1. 单元测试中，可以使用 `client.post('/', data={'item_text': 'A new list item'})` 来模拟客户端请求，data属性储存的是请求的参数
 
-2. `request.POST['item_text']`返回的是一个字典对象、该对象可以使用get方法
+2. `request.POST`返回的是一个字典对象、该对象可以使用get方法
 
 3. Django的model可以使用save()、count()方法来查询对象的信息，与保存对象(修改)、示例：
    
@@ -308,8 +308,84 @@ self.assertEqual(response['location'], '/')
 {% endfor %}
 ```
 
-    
-    
+# 第七节 改进功能测试 与 增量开发前导
+### 知识性收获
+#### 确保测试的稳定性和可靠性
+1. 功能测试应该具有很好的“**确定性(deterministic)**”和“**可靠性(reliable)**”。
+2. 单元测试在数据库方面**具有稳定性**。
+    *  当我们运行单元测试时，Django 会自动创建个全新的测试数据库（不同于真实数据库），这个数据库可以**安全的重置而不干扰真实数据库（db.sqlite3）**。
+3. 当测试类继承自 unittest 包的 TestCase 时（整个项目的功能测试），每一次测试将**不再建立临时数据库** ——————> 这样的测试稳定性极差
+    * 解决办法：
+        * 手动修改功能测试 ———— 修改 setUp 和 tearDown 方法让其具有稳定性
+        * 继承Django 1.4 后出现的新类 LiveServerTestCase
+4. **子类化 LiveServerTestCase 能让功能测试有一个稳定的行为**
+    * 其会像单元测试一样自动创建一个测试数据库
+    * 其会为每一次功能能测试部署一个独立的开发服务器
+        * 因为每次都会部署、所以get方法的url需要使用动态url`self.browser.get(self.live_server_url)`
+    * 其一般使用 manage.py 运行
+5. Django 1.6 以后**项目的测试运行器**（命令：python manage.py test）会自动搜索**本项目中**所有带 test 开头的代码，然后运行它。
+    * 所以**继承 LiveServerTestCase 的名为 test 的文件**可以将代码中的 main 方法删除 ~~`if __name__ == '__main__'`~~
+
+> **为了代码的整洁**，最好将项目的各个功能测试单独放在一个文件夹（functional_test）中。  
+> 继承了 LiveServerTestCase 后，且以单独的文件夹（functional_test）放置功能测试以后，单独运行功能测试需要运行这个代码 :  
+> `python manage.py test functional_tests`
+
+#### 减少或是调整必要的等待时间，使它更加合适
+1. **显式等待（explicit wait）与隐式等待（implicit waits）**
+    1. 显式等待 -> 单独的一句sleep代码 `time.sleep(1)`
+    2. Selenium 提供了隐式等待 `implicitly_wait()`，但是其在 Selenium 3 后的行为变得很不稳定
+2. **自己编写合适的隐式等待代码**:
+```python
+    def wait_for_row_in_list_table(self, row_text):
+
+    start_time = time.time()
+    while True:
+        try:
+            table = self.browser.find_element_by_id('id_list_table')
+            rows = table.find_elements_by_tag_name('tr')
+            self.assertIn(row_text, [row.text for row in rows])
+            return
+        except (AssertionError, WebDriverException) as e:
+            if time.time() - start_time > MAX_WAIT:
+                raise e
+
+            time.sleep(0.5)
+```
+
+> 此代码很 ugly ，因为其没有将 timing 和 re-raising logic 分开。后期需要 refactoring.
+
+#### 增量开发前导
+1. **增量开发**会使你的代码**一步一步**的从**一个可运行的状态**转变成**另一个可运行的状态**
+2. **YAGNI！** ———— 是我们用来抵制我们过度热情的创造性冲动的口头禅
+    1. 只设计和编写自己需要的功能
+    2. 不要编写不需要的功能而增加代码的复杂性
+3. 
+
+
+### 需要记住的代码
+1. 使用 LiveServerTestCase 后
+    1. 获取动态url的方法 `self.browser.get(self.live_server_url)`
+    2. 单独运行功能测试的指令 `python manage.py test functional_tests`
+    3. 单独运行单元测试的指令 `python manage.py test APPNAME`
+2. **自己编写合适的隐式等待代码**:
+```python
+    def wait_for_row_in_list_table(self, row_text):
+
+    start_time = time.time()
+    while True:
+        try:
+            table = self.browser.find_element_by_id('id_list_table')
+            rows = table.find_elements_by_tag_name('tr')
+            self.assertIn(row_text, [row.text for row in rows])
+            return
+        except (AssertionError, WebDriverException) as e:
+            if time.time() - start_time > MAX_WAIT:
+                raise e
+
+            time.sleep(0.5)
+```
+
+
      
 
 
