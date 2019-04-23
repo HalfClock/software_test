@@ -36,29 +36,6 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response,'home.html')
 
 
-    def test_can_save_a_POST_request(self):
-
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'A new list item')
-
-        #-------测试是否渲染模板-----
-        # self.assertIn('A new list item', response.content.decode())
-        #
-        # self.assertTemplateUsed(response, 'home.html')
-
-        #-----测试重定位------
-        # self.assertEqual(response.status_code,302)
-        # self.assertEqual(response['location'], "/")
-
-    def test_redirects_after_POST(self):
-        #------将重定位分离成单独的函数-----
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/lists/the-only-list-in-the-world/')
-
 
     def test_only_saves_items_when_necessary(self):
         self.client.get('/')
@@ -106,3 +83,18 @@ class ListViewTest(TestCase):
         self.assertContains(response,'itemey 2')
 
         # Setup, Exercise, Assert 是单元测试的经典结构.
+
+class NewListTest(TestCase):
+
+    def test_can_save_a_POST_request(self):
+
+        self.client.post('/lists/new', data={'item_text': 'A new list item'})
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
+
+    def test_redirects_after_POST(self):
+        #------将重定位分离成单独的函数-----
+        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        self.assertRedirects(response, '/lists/the-only-list-in-the-world/')
