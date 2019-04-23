@@ -21,7 +21,7 @@ python manage.py runserver
 # 第二节 TDD流程概述及功能测试
 #### 知识性收获
 
-1. 功能测试(Functional Test)==验收测试(Acceptance Test)==端到端测试(End-to-End Test)==黑盒测试(Black Box Test)
+1. 功能测试(Functional Test) == 验收测试(Acceptance Test) == 端到端测试(End-to-End Test)==黑盒测试(Black Box Test)
 2. **功能测试**：**面向用户的、从外部测试应用程序**，在创建功能测试时应该先编写User Story，然后按照User Story进行开发。
     * Functional tests should help you build an application with the right functionality, and guarantee you never accidentally break it.
 3. **单元测试**：**面向编程者、从内部测试应用程序。**
@@ -377,15 +377,34 @@ self.assertEqual(response['location'], '/')
             time.sleep(0.5)
 ```
 
-# 第八节 增量开发前导
+# 第八节 增量开发（上）
 ### 知识性收获
 1. **增量开发**会使你的代码**一步一步**的从**一个可运行的状态**转变成**另一个可运行的状态**
 2. **YAGNI！** ———— 是我们用来抵制我们过度热情的创造性冲动的口头禅
-    1. 只设计和编写自己需要的功能
-    2. 不要编写不需要的功能而增加代码的复杂性
+    * 只设计和编写自己需要的功能
+    * 不要编写不需要的功能而增加代码的复杂性
+3. **REST**   
+     Representational State Transfer（REST）是一种** Web 设计方法**，通常用于指导基于 Web 的 API 的设计。
+4. **##号的注释**
+    * 单 # 号的注释，是为了解释代码
+    * 双 # 号是为了提醒当初的自己为什么这么做
+5. **在编写新功能前，确保我们有一个回归测试（Regression Test）**
+    * 当你**需要添加新功能时**，首先应该编写的是功能测试，但是此时**应该要有一个回归测试来保证你之前的功能不会在增加功能时被破坏**
+    * 如果在**添加新功能时**，你已经有了一个测试函数/类、那么**在保留它的前提下，引入新的测试类/测试函数。**
+    * 当你在修改代码时，发现你的回归测试出了差错，你**必须回去保证回归测试正常。** ——> 编写新的单元测试、进入新的 TDD 循环。
+6. 当**所有的单元测试都通过了、而功能测试依旧没有通过**，通过研究测试的代码后，发现：
+    *  确信单元测试代码的确覆盖了功能测试的问题，那么**通常指向了单元测试未涵盖的问题**
+    *  如果发现单元测试代码没有覆盖功能测试的问题，那么重新编写单元测。
+7. 默认情况下，浏览器将POST数据发送回其**当前所在的URL**(*进入这个页面的 URL*)
+    * 当你想要更改此 POST 的 url 时，去修改 from 表单的 action 属性如：`<form method="POST" action="/lists/new">`
+8. 我们约定**当 URL 的结尾没有 “/” 时**，代表着我们**要使用这个 URL 去修改数据库中的数据**了。
+9. 目前理解中增量开发是：
+    * 每一次去尝试开发一个很小的改变、比如，我们将一个需要的功能分解成了四个小部分、先针对这个功能编写功能测试、然后再分别对这四个小部分编写单元测试，以编写代码和进行重构。
 
+### 需要记住的代码
+1. 利用**正则表达式**的断言语句`self.assertRegex(需要判断的字符串, '正则式')`。
+2. 使用 assertContains 代替 assertIn/ response.content.decode()。
+    * `self.assertContains(response, 需要查找的字符串)`
+3. 测试 response 是否**重定向**到某一个 url 的断言。
+    * `self.assertRedirects(response, '重定向的 url')`
 
-     
-
-
- 
