@@ -320,7 +320,7 @@ self.assertEqual(response['location'], '/')
         * 继承Django 1.4 后出现的新类 LiveServerTestCase
 4. **子类化 LiveServerTestCase 能让功能测试有一个稳定的行为**
     * 其会像单元测试一样自动创建一个测试数据库
-    * 其会为每一次功能能测试部署一个独立的开发服务器
+    * 其会为每一次功能测试部署一个独立的开发服务器
         * 因为每次都会部署、所以get方法的url需要使用动态url`self.browser.get(self.live_server_url)`
     * 其一般使用 manage.py 运行
 5. Django 1.6 以后**项目的测试运行器**（命令：python manage.py test）会自动搜索**本项目中**所有带 test 开头的代码，然后运行它。
