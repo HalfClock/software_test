@@ -408,3 +408,34 @@ self.assertEqual(response['location'], '/')
 3. 测试 response 是否**重定向**到某一个 url 的断言。
     * `self.assertRedirects(response, '重定向的 url')`
 
+# 第九节 增量开发（下）
+### 知识性收获
+1. `A = models.TextField(default='')`这个类型只能保存字符串类型、若是把自定义对象赋给 A ，那么会保存着这个对象的字符串表示。
+2. 若想要在数据库 Model 中保存另一个对象，则需要使用 `models.ForeignKey(ForeignClass, default=None)`
+3. 删除迁移很危险。我们确实需要一次又一次地做，因为我们并不总是在第一时间获得我们的模型代码。但是如果删除已经应用于某个数据库的迁移，Django将会对它所处的状态以及如何应用未来的迁移感到困惑。只有在确定未使用迁移时才应该这样做。一个好的经验法则是，您永远不应删除或修改已提交给VCS的迁移。
+4. 格式化字符串常量
+    1. **是 Python3.6 新引入的一种字符串格式化方法**，主要目的是使格式化字符串的操作更加简便。
+    2. f-string在形式上是以 f 或 F 修饰符引领的字符串（f'xxx' 或 F'xxx'），以大括号 {} 标明被替换的字段；f-string在本质上并不是字符串常量，而是一个在运行时运算求值的表达式,例：
+        1. `comedian = {'name': 'Eric Idle', 'age': 74}`
+        2. `f"The comedian is {comedian['name']}, aged {comedian['age']}."`
+5. 在 url.py 中 urlpatterns 列表里的 url 对象的第一个参数往往是正则表达式，其中**每使用一次 “group” —— () ，就会传递 group 里正则识别出的字符串**给第二个参数（可调用对象，一般是 view 中的函数）
+6. Model 中的每一类都可以使用 `ClassName.objects.get(id=object_id)` 函数进行查找并拿到指定 id 的对象。
+7. Model 中的每一类都可以使用 `ClassName.objects.filter(AttributeName = attr)`函数进行筛查查出数据库里该类的所有对象中**某属性 == attr 的所有对象**，并**返回集合**
+8. **.item_set称为反向查找**：它是Django令人难以置信的ORM之一，可让您从不同的表中查找对象的相关项目，例如：`for item in list.item_set.all`，这个循环每一次都能拿到一个 item ，**这些 item 是根据 list 对象反向查找的所有 item（item 里包含了list 对象）**
+9. project/urls.py 实际上适用于适用于整个站点的 URL。
+    1. 对于仅适用于列表应用程序的 URL，Django鼓励我们使用单独的 application/ urls.py，以使应用程序更加自包含。
+    2. project/urls.py 的 urlpatterns 可以添加 `url(r'^lists/', include(list_urls))`include 是包含。请注意，它可以将URL正则表达式的一部分作为前缀，这将应用于所有包含的URL（这是我们减少重复的位，以及为我们的代码提供更好的结构）。
+    3. application/ urls.py 里的 `urlpatterns = [ url(r'^new$', views.new_list, name='new_list')]`
+    4. 若将 2 中的 urlpatterns 展开会是这样：`url(r'^lists/new$', views.new_list, name='new_list')`
+10. 增量开发：
+    1. 工作状态到工作状态（又名测试山羊与重构猫）
+        * 增量开发鼓励我们一步一步，慢慢的从工作状态到工作状态。
+        * 这里的工作状态是指之前的测试用例通过、也就是增加新功能时，回归测试通过。
+    2. 将工作分成小的，可实现的任务。
+    3. 遵循 YAGNI 法则，不开发没有必要的功能使代码变得臃肿。
+### 需要记住的代码
+1. 数据库 Model 中的外键代码:`models.ForeignKey(ForeignClass, default=None)`
+2. Model 中的每一类都可以使用 `ClassName.objects.get(id=object_id)` 函数进行查找并拿到指定 id 的对象。
+3. Model 中的每一类都可以使用 `ClassName.objects.get(id=object_id)` 函数进行查找并拿到指定 id 的对象。
+4. Model 中的每一类都可以使用 `ClassName.objects.filter(AttributeName = attr)`函数进行筛查查出数据库里该类的所有对象中**某属性 == attr 的所有对象**，并**返回集合**
+5. **.item_set称为反向查找**：它是Django令人难以置信的ORM之一，可让您从不同的表中查找对象的相关项目，例如：`for item in list.item_set.all`
