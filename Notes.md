@@ -433,9 +433,23 @@ self.assertEqual(response['location'], '/')
         * 这里的工作状态是指之前的测试用例通过、也就是增加新功能时，回归测试通过。
     2. 将工作分成小的，可实现的任务。
     3. 遵循 YAGNI 法则，不开发没有必要的功能使代码变得臃肿。
+
 ### 需要记住的代码
 1. 数据库 Model 中的外键代码:`models.ForeignKey(ForeignClass, default=None)`
 2. Model 中的每一类都可以使用 `ClassName.objects.get(id=object_id)` 函数进行查找并拿到指定 id 的对象。
 3. Model 中的每一类都可以使用 `ClassName.objects.get(id=object_id)` 函数进行查找并拿到指定 id 的对象。
 4. Model 中的每一类都可以使用 `ClassName.objects.filter(AttributeName = attr)`函数进行筛查查出数据库里该类的所有对象中**某属性 == attr 的所有对象**，并**返回集合**
 5. **.item_set称为反向查找**：它是Django令人难以置信的ORM之一，可让您从不同的表中查找对象的相关项目，例如：`for item in list.item_set.all`
+
+## 第十节 布局和样式测试
+### 知识性收获
+1. **TDD 不应该测试美学(玄学）、但是我们可以测试我们美学的实施**（让我们自己确信代码是有效的），例如：我们可以快速检查主输入框是否按照我们在每个页面上的方式对齐，这将使我们相信该页面的其余样式也可能已加载。
+
+2. **Django 模板继承**
+    1. **Django模板语言使模板继承变得容易。**
+    2. 使用模板继承：
+        1. 在**模板“父类”里使用**`{% block 变量名%}{% endblock %}`代表字符串、变量等 python 变量的**占位符。**
+        2. 在**模板的子类中**使用`{% extends '父类模板名称.html' %}`**加载“父类”模板**
+        3. 使用 `{% block 变量名%} 实际的变量/代码段 {% endblock %}` **代替模板“父类”中的变量占位符。**
+
+### 需要记住的代码
