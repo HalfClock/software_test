@@ -1,17 +1,15 @@
 from django.test import LiveServerTestCase
 import time
 from selenium import webdriver
-import unittest
 from selenium.webdriver.common.keys import Keys
 
 from selenium.common.exceptions import WebDriverException
 
-
 MAX_WAIT = 10
+
+
 # class NewVisitorTest(unittest.TestCase):
 class NewVisitorTest(LiveServerTestCase):
-
-
 
     def setUp(self):
         self.browser = webdriver.Chrome()
@@ -19,8 +17,7 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-#------动态的等待检查时间-----
-
+    # ------动态的等待检查时间-----
 
     def wait_for_row_in_list_table(self, row_text):
 
@@ -40,8 +37,6 @@ class NewVisitorTest(LiveServerTestCase):
     # 第六节初始另写了一个
     def test_can_start_a_list_for_one_user(self):
 
-
-
         # Edith has heard about a cool new online to-do app. She goes
         # to check out its homepage
 
@@ -55,7 +50,7 @@ class NewVisitorTest(LiveServerTestCase):
         # She is invited to enter a to-do item straight away
         inputbox = self.browser.find_element_by_id('id_new_item')
 
-        self.assertEqual(inputbox.get_attribute('placeholder'),'Enter a to-do item')
+        self.assertEqual(inputbox.get_attribute('placeholder'), 'Enter a to-do item')
 
         # She types "Buy peacock feathers" into a text box (Edith's hobby # is tying fly-fishing lures)
         inputbox.send_keys('Buy peacock feathers')
@@ -66,7 +61,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         time.sleep(1)
 
-        #没有动态检查时间的版本
+        # 没有动态检查时间的版本
         # self.check_for_row_in_list_table('1: Buy peacock feathers')
         self.wait_for_row_in_list_table('1: Buy peacock feathers')
 
@@ -78,12 +73,6 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('2: Use peacock feathers to make a fly')
 
         self.wait_for_row_in_list_table('1: Buy peacock feathers')
-
-        [...]
-
-
-
-
 
     def test_multiple_users_can_start_lists_at_different_urls(self):
 
@@ -102,7 +91,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         ## We use a new browser session to make sure that no information
         ## of Edith's is coming through from cookies etc
-        #双#号是为了提醒当初的自己为什么这么做
+        # 双#号是为了提醒当初的自己为什么这么做
 
         self.browser.quit()
         self.browser = webdriver.Chrome()
@@ -134,3 +123,31 @@ class NewVisitorTest(LiveServerTestCase):
 
         # Satisfied, they both go back to sleep
 
+    def test_layout_and_styling(self):
+
+        # Edith goes to the home page
+
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+
+        # She notices the input box is nicely centered
+
+        inputbox = self.browser.find_element_by_id('id_new_item')
+
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            512,
+            delta=10
+        )
+
+        # She starts a new list and sees the input is nicely
+        #  centered there too
+        inputbox.send_keys('testing')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: testing')
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            512,
+            delta=10
+        )
