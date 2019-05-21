@@ -443,14 +443,69 @@ self.assertEqual(response['location'], '/')
 
 ## 第十节 布局和样式测试
 ### 知识性收获
-1. **TDD 不应该测试美学(玄学）、但是我们可以测试我们美学的实施**（让我们自己确信代码是有效的），例如：我们可以快速检查主输入框是否按照我们在每个页面上的方式对齐，这将使我们相信该页面的其余样式也可能已加载。
+1. **TDD 不应该测试美学(玄学）、但是我们可以测试我们美学的实施**（让我们自己确信代码是有效的），例如：我们可以快速检查主输入框是否按照我们在每个页面上的方式对齐，这将使我们相信该页面的其余样式也可能已加载。 本节讲述了**如何进行冒烟测试**、以及如何在 Django 中**正确的、****高效的**加载静态文件。（包括：运行、测试、部署）
 
-2. **Django 模板继承**
+2. **冒烟测试（smoke test）**
+    1. 检查您的静态文件和CSS是否正常工作
+3. **Django 模板继承**
     1. **Django模板语言使模板继承变得容易。**
     2. **目的：**减少重复代码
     3. 使用模板继承：
         1. 在**模板“父类”里使用**`{% block 变量名%}{% endblock %}`代表字符串、变量等 python 变量的**占位符。**
         2. 在**模板的子类中**使用`{% extends '父类模板名称.html' %}`**加载“父类”模板**
         3. 使用 `{% block 变量名%} 实际的变量/代码段 {% endblock %}` **代替模板“父类”中的变量占位符。**
+4. **Django及任何Web服务器都需要知道处理静态文件的两件事：**
+    1. **如何判断 URL 请求何时用于静态文件，而不是用于通过视图函数(view)提供的某些HTML。(url 映射的 view)**
+        1. Django 允许我们定义一个 URL “前缀”，表示任何以该前缀开头的URL都应被视为对静态文件的请求。默认情况下，前缀为`/static/`。它在 settings.py 中定义。`STATIC_URL = '/static/'`
+    2. **在哪里找到用户想要的静态文件。**
+        1. 当我们使用 Django 开发服务器（`manage.py runserver`）时，我们可以依靠 Django 为我们神奇地找到静态文件 - 它只会查看我们的一个名为 static 的**应用程序(app -> list)的** *任何* 子文件夹(list/static)。
+5. **虽然 `runserver` 自动找到静态文件，但 `LiveServerTestCase` 却不会（运行服务会、但是测试确不会）**
+    **解决办法：**
+        * 将 `LiveServerTestCase` 改成 `StaticLiveServerTestCase`
+5. **从各种应用程序文件夹中收集所有静态文件**
+    1. 当你在一个真正的Web服务器上运行时，你不希望 Django 使用 Python 来提供原始文件的静态内容，**因为这样是缓慢而低效的**，而**像 Apache 或 Nginx 这样的 Web 服务器可以完成这一切。**
+    2. 静态文件文件夹不应该将它置于源代码的目录之下。
+    3. **出于 1、2 中的原因**，您希望能够从各种应用程序文件夹中**收集所有静态文件**，并将它们复制到一个位置，**以便进行部署**。这就是 `collectstatic` 命令的用途。
+    4. 收集的静态文件所在的位置在 settings.py 中定义为 `STATIC_ROOT`，具体如下:
+```python
+STATIC_URL = '/static/'  
+STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static'))
+## “..” 是指项目文件夹的上级目录
+```
+
+    1. 配置好以后、使用 `python manage.py collectstatic` 进行自动化收集工作。
+ 
+
+### 需要记住的代码
+
+1. 收集的静态文件所在的位置在 settings.py 中定义为 `STATIC_ROOT`，具体如下:
+```python
+STATIC_URL = '/static/'  
+STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static'))
+## “..” 是指项目文件夹的上级目录
+```
+2. 使用 `python manage.py collectstatic` 进行自动化收集工作。
+
+## 第十一节 使用阶段服务器测试部署
+### 知识性收获
+
+1. **为什么需要进行部署测试？**
+    1. 在与生站点(producer)相同的基础架构上使用暂存站(staging server)点可以**帮助我们测试我们的部署并在我们进入“真实”站点之前做好准备。**
+    2. 我们还可以针对**临时站点运行我们的功能测试**。这将使我们放心，我们在服务器上拥有正确的代码和软件包，并且由于我们现在对我们的站点布局进行了“冒烟测试”，我们将知道CSS 已正确加载。
+    3. 就像在我们自己的 PC 上一样，当您运行多个 Python 应用程序时，**virtualenv** 在服务器上用于管理包和依赖项非常有用。
+    4. 最后，通过使用**自动脚本来部署新版本，并使用相同的脚本部署到分段和生产**，我们可以向自己保证，尽可能多地进行分段。
+2. **怎么使用本地测试代码测试服务器？**
+    1. 在命令行添加一个变量并赋值为服务器的 IP：`STAGING_SERVER= python 47.94.248.236 manage.py test functional_tests`、这里存储的变量是 STAGING_SERVER ，服务器 ip 是 47.94.248.236。
+    2. 在测试代码中检查是否填写了此变量、若填写了、将测试 url 改成 `'http://' + staging_server`、完整代码见下：
+
+```python
+class NewVisitorTest(StaticLiveServerTestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Chrome()
+        staging_server = os.environ.get('STAGING_SERVER')
+        if staging_server:
+            self.live_server_url = 'http://' + staging_server
+```
 
 ### 需要记住的代码
