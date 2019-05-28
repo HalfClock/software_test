@@ -497,7 +497,7 @@ STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static'))
 2. **怎么使用本地测试代码测试服务器？**
     1. 在命令行添加一个变量并赋值为服务器的 IP：`STAGING_SERVER= python 47.94.248.236 manage.py test functional_tests`、这里存储的变量是 STAGING_SERVER ，服务器 ip 是 47.94.248.236。
     2. 在测试代码中检查是否填写了此变量、若填写了、将测试 url 改成 `'http://' + staging_server`、完整代码见下：
-
+    
 ```python
 class NewVisitorTest(StaticLiveServerTestCase):
 
@@ -507,5 +507,26 @@ class NewVisitorTest(StaticLiveServerTestCase):
         if staging_server:
             self.live_server_url = 'http://' + staging_server
 ```
+1. **配置与部署的区别**
+    1. 配置通常需要 root 权限，而部署通常不依赖 root 账户
+2. **站点文件夹安排指导**
+    1. 每个站点（网站）**都应该有自己的文件夹**。
+        1. 我们分别有一个单独的文件夹，存储源代码，数据库和静态文件。
+        2. 逻辑是，虽然源代码可能会从站点的一个版本更改为下一个版本，但数据库将保持不变。
+        3. 最后，virtualenv 也需要设置自己的子文件夹
+    2. ![](/images/15590561543622.jpg)
+3. **使用 virtualenv 管理环境**时，可以使用 `requirement.txt` 储存我们需要的包、需要时使用 `virtualenv/bin/pip install -r requirement.txt` 即可全部安装。
+4. nginx 的配置文件储存在 `/etc/nginx/sites-enabled`中，通常这里的文件夹储存的文件是`/etc/nginx/sites-available`文件的软连接。
+5. **服务器调试技巧**
+    1. Nginx错误日志在/var/log/nginx/error.log。
+    2. 可以使用 nginx -t “检查”它的配置
+    3. 确保您的浏览器没有缓存过时的响应。使用Ctrl-Refresh，或启动新的私人浏览器窗口。
+    4. 有时会在服务器上看到莫名其妙的行为，只有在使用 sudo 完全重新启动它时才能解决。
+
+### 需要记住的代码
+1. 使用 virtualenv 管理环境时，可以使用 `requirement.txt` 储存我们需要的包、需要时使用 `virtualenv/bin/pip install -r requirement.txt` 即可全部安装。
+
+## 第十二节 部署生产服务器
+### 知识性收获
 
 ### 需要记住的代码
