@@ -528,5 +528,94 @@ class NewVisitorTest(StaticLiveServerTestCase):
 
 ## 第十二节 部署生产服务器
 ### 知识性收获
+#### **为什么不能只使用 Django 自带的 `runserver` 运行自带的服务器当做生产服务器？**
+* 自带的 Web 服务器不是为了实际生产而设计的，一般来说只适合用作测试开发。
+* Nginx 等优秀的静态文件服务器能够很好的解决高并发、负载均衡等问题。
+* ...
 
-### 需要记住的代码
+#### **Gunicorn** 
+1. **Gunicorn 是一个实现了 uwsgi 协议与 WSGI 协议两种协议的 WEB 服务器。**他的作用，简单来讲就是**使用 uwsgi 协议与其他 WEB 服务器(nginx/apache)进行通信。****使用 WSGI 于 WEB 框架（Flask/Django）进行通讯。**
+
+2. **Gunicorn、Nginx、Django 的关系如下图**：
+    ![未命名文件](/images/%E6%9C%AA%E5%91%BD%E5%90%8D%E6%96%87%E4%BB%B6.png)
+    1. Nginx 负责接收 http 请求，**如果请求是静态文件**，那么直接根据 URI 返回静态文件，**如果是请求 WEB 应用数据**，那么将请求转发给 Gunicorn Web 服务器。
+    2. Gunicorn 接收 socket 消息后将信息转发给 WEB 应用程序(Django)。
+    3. Django 处理信息，返回 HTTP 响应，将之返回给 Gunicorn，Gunicorn 再返回给Nginx，Nginx 进行打包将 HHTTP 响应发送给用户。
+
+3. 由上图可知，为了让 Nginx 能直接返回静态文件，我们必须让 Nginx 知道静态文件所在的位置，在 Nginx 配置文件中配置：
+
+```python
+location /static { 
+    alias 静态文件地址; 
+}
+```
+
+#### **当我们需要使用一个 Nginx 服务器运行 staging 和 live 两个服务时，应该如何配置？**
+1. 首先，Nginx 与 Gunicorn 不应该再使用硬编码的 8000 端口`location / { proxy_pass http://localhost:8000; }`，进行 socket 通信了。
+
+2. 使用 Unix domain sockets (Unix 域套接字) 可以解决这个问题，使用 Unix 域套接字通信，不向使用 `http://localhost:8000` 需要通过完整的网络层协议栈，其原理是直接在两个服务器之间使用进程间通信来获取信息。
+    1. 在 Ngix 服务器中使用如下代码配置 Unix 域套接字:
+
+```python
+location / { 
+    proxy_set_header Host $host; 
+    proxy_pass http://unix:/tmp/网站名.socket; 
+}
+```
+
+使用如下命令来打开 Gunicorn 
+`gunicorn --bind \ unix:/tmp/网站名 项目名.wsgi:application`
+
+#### **服务器安全**
+1. **关闭项目 DEBUG 界面**
+Django 的 DEBUG 页面方便调试，但是这些页面并不安全，能让一些黑客有机可乘。需要在 Django 的 setting.py 文件中将 `DEBUG` 设置为 `False` 
+2. **设置 Django 的 ALLOWED_HOSTS**
+因为，此时我们使用 Gunicorn 与 Django 应用程序进行通讯，所以需要设置 Django 允许被访问的主机名为 Gunicorn 服务器（本机）
+将 setting.py 文件中的 `ALLOWED_HOSTS` 列表加入 `Gunicorn` 主机名。
+
+#### **保证服务器的稳定运行**
+1. 为了使服务器能够稳定运行，我们需要**确保 Gunicorn 在系统启动时运行，并保证在系统崩溃时重启。**
+2. **编写系统服务**
+    1. 在 `/etc/systemed/system/` 下新建 “服务名.service” 文件
+    2. 填充如下内容：
+
+```shell
+[Unit] 
+Description=Gunicorn server for 自己的服务名
+
+[Service] 
+Restart=on-failure # 将在进程崩溃时自动重启
+User= 能够访问项目文件的用户名 
+WorkingDirectory= 项目源码的根目录
+ExecStart= 虚拟环境目录/gunicorn --bind unix:/tmp/之前配置过的网站名.socket 应用名.wsgi:application # 实际运行的命令
+
+[Install] 
+WantedBy=multi-user.target # 告诉 Systemd 我们想在系统启动 boot 时即运行此服务
+```
+---
+编写完 .service 文件后需要重新加载，以便以 Systemd 启动 Gunicorn
+    * `sudo systemctl daemon-reload` 告诉 Systemd 加载刚才编写的 .service 文件
+    * `sudo systemctl enable 服务名` 告诉 Systemd 永远在 boot 时启动该服务
+    * `sudo systemctl start 服务名` 实际启动服务名的命令
+
+#### 需要将配置文件单独保存在一个文件夹中
+刚才我们配置了 Nginx 的配置文件，和自动启动 Gunicorn 的 Systemd 服务文件，为了方面以后自动化部署能够重用，我们将之放在一个文件夹 deploy_tools 下：
+
+注意将之前配置文件内容的网站名改成统一的变量，例如 `SITENAME`，例如：
+
+```shell
+[Unit] 
+Description=Gunicorn server for SITENAME
+
+[Service] 
+Restart=on-failure # 将在进程崩溃时自动重启
+User= 能够访问项目文件的用户名 
+WorkingDirectory= 项目源码的根目录
+ExecStart= 虚拟环境目录/gunicorn --bind unix:/tmp/SITENAME.socket 应用名.wsgi:application # 实际运行的命令
+
+[Install] 
+WantedBy=multi-user.target # 告诉 Systemd 我们想在系统启动 boot 时即运行此服务
+```
+
+## 十三节自动部署
+### 知识性收获
